@@ -4,10 +4,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.ElevatedButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -15,6 +14,9 @@ import androidx.compose.ui.unit.dp
 import com.gates.bcs.ui.theme.BcsTheme
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,12 +31,27 @@ class MainActivity : ComponentActivity() {
 
 // This allows you to reuse a comosable like api slots
 @Composable
-fun MyApp(
+fun MyApp(modifier: Modifier = Modifier) {
+    // Adding the logic to show the different screens in MyApp,
+    //  and hoist/lift/elevate the state.
+    var shouldShowOnboarding by remember { mutableStateOf(true)}
+
+    Surface(modifier) {
+        if (shouldShowOnboarding) {
+            OnboardingScreen(onContinueClicked = { shouldShowOnboarding = false})
+        } else {
+            Greetings()
+        }
+    }
+}
+
+@Composable
+private fun Greetings(
     modifier: Modifier = Modifier,
-    names: List<String> = listOf("World", "Compose")
+    names: List<String> = List(1000) {"1,2,3,4,5,6,7,8,9"}
 ) {
-    Column(modifier = modifier.padding(vertical = 4.dp)) {
-        for (name in names) {
+    LazyColumn(modifier = modifier.padding(vertical = 4.dp)) {
+        items(items = names) { name ->
             Greeting(name = name)
         }
     }
@@ -43,7 +60,7 @@ fun MyApp(
 @Composable
 private fun Greeting(name: String) {
     // State & MutableState hold some value and trigger UI updates(recompositions)
-    //, whenever that value changes. To add state to a composable use mutablestateof.
+    //, whenever that value changes. To add state to a composable use mutable state of.
     val expanded = remember { mutableStateOf(false)}
     // Creating the actual ui effect, such that it expands when clicked.(Using extra padding)
     // No remember required as it is a simple calculation.
@@ -82,10 +99,47 @@ private fun Greeting(name: String) {
     }
 }
 
-@Preview(showBackground = true, widthDp = 320)
 @Composable
-private fun DefaultPreview() {
+fun OnboardingScreen(
+    onContinueClicked: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text("Welcome to the DOJO!")
+        Button(
+            modifier = Modifier
+                .padding(vertical = 24.dp, horizontal = 32.dp),
+            onClick = onContinueClicked
+        ) {
+            Text("Continue")
+        }
+    }
+
+}
+@Preview(showBackground = true, widthDp = 320, heightDp = 320)
+@Composable
+fun OnboardingPreview() {
     BcsTheme {
-        MyApp()
+        OnboardingScreen(onContinueClicked = {})
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun DefaultPreview() {
+    BcsTheme {
+        Greetings()
+    }
+}
+
+@Preview
+@Composable
+fun MyAppPreview() {
+    BcsTheme {
+        MyApp(Modifier.fillMaxSize())
     }
 }
